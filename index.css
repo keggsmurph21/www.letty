@@ -1,0 +1,55 @@
+/**
+ * This is where we define how the document is laid out!
+ */
+
+body {
+  margin: 0;
+}
+
+#main {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  align-items: center;
+}
+
+#header {
+  width: 100%;
+  height: 2em;
+
+  background-color: #696969;
+
+  display: flex;
+  flex-flow: row nowrap;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+#row-container {
+  width: 100%;
+}
+
+.row {
+  height: 20em;
+
+  margin: 1em 0 5em 0;
+
+  display: flex;
+  flex-flow: row nowrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.photo-container {
+  height: 100%;
+}
+
+.photo {
+  height: 100%;
+
+  margin: 0 3em 0 3em;
+}
+
+.debug {
+  border: solid 1px magenta;
+}
