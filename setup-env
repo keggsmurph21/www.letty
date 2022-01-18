@@ -49,8 +49,8 @@ source "$LETTY_VENV/bin/activate"
 bootstrap_checksum="$(cat \
         "$LETTY_ROOT/setup-env" \
         "$LETTY_ROOT/setup.cfg" \
-    | sha256sum - \
-    | cut -d' ' -f1)"
+    | openssl sha256 \
+    | cut -d' ' -f2)"
 
 bootstrap_cache="$LETTY_VENV/.www.letty-$bootstrap_checksum.checksum"
 if ! [ -e "$bootstrap_cache" ]; then
