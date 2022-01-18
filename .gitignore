@@ -5,3 +5,6 @@ __pycache__/
 
 # The virtual environment.
 venv/
+
+# The files we generate from our input files.
+www/generated/

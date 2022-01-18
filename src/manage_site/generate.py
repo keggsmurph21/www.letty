@@ -6,6 +6,7 @@ import argparse
 import jinja2
 from pathlib import Path
 
+from . import meta
 from .model import Data
 
 
@@ -15,7 +16,7 @@ HTML_TEMPLATE = """
 <head>
   <meta charset="utf-8">
   <title>TODO</title>
-  <link href="index.css" rel="stylesheet">
+  <link href="{{ static_root }}/index.css" rel="stylesheet">
 </head>
 <body>
   <div id="main">
@@ -72,7 +73,34 @@ def render(data: Data, *, debug_css: bool, photo_link_prefix: str) -> str:
         rows=data.rows,
         debug_css=debug_css,
         photo_link_prefix=photo_link_prefix,
+        static_root=meta.STATIC_ROOT,
     )
+
+
+def generate_site(
+    input_data: Path,
+    output_dir: Path,
+    *,
+    photo_link_prefix: str,
+    debug_css: bool,
+) -> None:
+
+    # Read in the data from disk that we were given.
+    data = Data.load(input_data)
+
+    # Take the values from that data and use them to generate
+    # an HTML document (string).
+    document = render(
+        data,
+        debug_css=debug_css,
+        photo_link_prefix=photo_link_prefix,
+    )
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_file = output_dir / "index.html"
+
+    with open(output_file, "w") as f:
+        f.write(document)
 
 
 def main() -> None:
@@ -82,8 +110,15 @@ def main() -> None:
         "-i",
         "--input-data",
         type=Path,
-        default="data.yml",
+        default=meta.INPUT_DATA,
         help="Path to the *.yml file that defines which images to show.",
+    )
+    parser.add_argument(
+        "-o",
+        "--output-dir",
+        type=Path,
+        default=meta.GENERATED_ROOT,
+        help="Path to the output file to generate into.",
     )
     parser.add_argument(
         "--photo-link-prefix",
@@ -97,13 +132,9 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    # Read in the data from disk that we were given.
-    data = Data.load(args.input_data)
-
-    # Take the values from that data and use them to generate
-    # an HTML document (string).
-    document = render(data, debug_css=args.debug_css, photo_link_prefix=args.photo_link_prefix,)
-
-    # Print the document (to <stdout>) so other tools can decide
-    # what to do with it (e.g., save it somewhere on disk).
-    print(document)
+    generate_site(
+        args.input_data,
+        args.output_dir,
+        photo_link_prefix=args.photo_link_prefix,
+        debug_css=args.debug_css,
+    )
