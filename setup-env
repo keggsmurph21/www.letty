@@ -1,0 +1,77 @@
+#!/bin/bash
+#
+# Activate the virtual environment :^)
+
+# Note that since this script is meant to be "source"d, we can't use
+# the "set -euo pipefail" idiom (since that means that we would set
+# those shell options in our host environment (this would cause bash
+# to exit if we ran any command returning a non-zero exit code)).
+
+export LETTY_ROOT="$(git rev-parse --show-toplevel)"
+export LETTY_VENV="$LETTY_ROOT/venv/www.letty"
+
+# Keep this in sync with the "python_requires" section of "setup.cfg".
+export LETTY_PYTHON=python3.9
+
+# Pin our version of "pip" here.  Note that this is a little bit
+# strange to pin a version here, but we need to make sure this is
+# up-to-date *before* installing our package.
+export LETTY_PIP_VERSION=21.3.1
+
+# It's possible to use $PYTHONPATH to manage importing Python files from other
+# directories, but that can confuse some of our tools if any local modules
+# have names that conflict with standard library packages, since directories
+# in $PYTHONPATH will supersede our directories from our virtual environments.
+# See [1] and [2].
+#
+# [1] https://docs.python.org/3.6/tutorial/modules.html#the-module-search-path
+# [2] https://docs.python.org/3.6/using/cmdline.html#envvar-PYTHONPATH
+if [ -n "${PYTHONPATH:-}" ]; then
+    echo -e "\e[1;31m[ERROR]\e[0m Refusing to build with \$PYTHONPATH set!" >&2
+    return 1
+fi
+
+# Create a virtual environment if we don't already have one.
+if [ ! -e "$LETTY_VENV/bin/activate" ]; then
+    echo "Creating a virtual environment at '$LETTY_VENV'" >&2
+    rm -rf "$LETTY_VENV"
+    "$LETTY_PYTHON" -m venv "$LETTY_VENV"
+fi
+
+# Activate the virtual environment.
+source "$LETTY_VENV/bin/activate"
+
+# Compute a checksum of this file and our overall package
+# config (and potentially any other files that affect how
+# we bootstrap our environment). We'll use this to try and
+# skip invoking `pip`, since it's pretty slow.
+
+bootstrap_checksum="$(cat \
+        "$LETTY_ROOT/setup-env" \
+        "$LETTY_ROOT/setup.cfg" \
+    | sha256sum - \
+    | cut -d' ' -f1)"
+
+bootstrap_cache="$LETTY_VENV/.www.letty-$bootstrap_checksum.checksum"
+if ! [ -e "$bootstrap_cache" ]; then
+    # Install `wheel` first, since it speeds up later installs.
+    # We can install it without a specific version since we
+    # only need a specific version when we're building our own
+    # packages (see "pyproject.toml").
+    pip install wheel
+    pip install "pip==$LETTY_PIP_VERSION"
+
+    # Install our package in "editable" mode, which means
+    # that our changes will be visible immediately (without
+    # needing to reinstall).
+    #
+    # We'll also install the "dev" extras locally.
+    pip install --editable .[dev]
+
+    # Make sure the next time around, we can skip this whole
+    # block!
+    touch "$bootstrap_cache"
+fi
+
+unset bootstrap_checksum
+unset bootstrap_cache

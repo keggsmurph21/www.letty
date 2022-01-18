@@ -107,7 +107,3 @@ def main() -> None:
     # Print the document (to <stdout>) so other tools can decide
     # what to do with it (e.g., save it somewhere on disk).
     print(document)
-
-
-if __name__ == "__main__":
-    main()

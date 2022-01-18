@@ -1,0 +1,49 @@
+# This file contains general configuration files for thirdparty
+# tools like linters, code formatters, type checkers, etc.
+#
+# See https://pip.pypa.io/en/stable/reference/build-system/pyproject-toml/
+
+[build-system]
+requires = [
+  'setuptools==60.5.0',
+  'wheel==0.37.1',
+]
+build-backend = 'setuptools.build_meta'
+
+[tool.black]
+# Black is a Python code formatter
+# https://black.readthedocs.io/en/stable/
+line-length = 100
+
+[tool.mypy]
+# Mypy is a Python type checker
+# https://mypy.readthedocs.io/en/stable/index.html
+
+python_version = 3.9
+
+files =
+  src/
+
+# Make error behavior a little more user friendly (at the expense of
+# some runtime slowdown?)
+pretty = True
+show_column_numbers = True
+show_error_codes = True
+show_error_context = True
+
+# These flags are equivalent to running mypy in "--strict" mode
+check_untyped_defs = True
+disallow_any_generics = True
+disallow_incomplete_defs = True
+disallow_subclassing_any = True
+disallow_untyped_calls = True
+disallow_untyped_decorators = True
+disallow_untyped_defs = True
+no_implicit_optional = True
+no_implicit_reexport = True
+strict_equality = True
+warn_redundant_casts = True
+warn_return_any = True
+warn_unreachable = True
+warn_unused_configs = True
+warn_unused_ignores = True

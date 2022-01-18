@@ -1,1 +1,7 @@
-# TODO
+# Random Python-generated files.
+__pycache__/
+*.pyc
+*.egg-info/
+
+# The virtual environment.
+venv/
