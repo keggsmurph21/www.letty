@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# Make sure the code we have is valid according to some best-effort
+# checks we can run!
+
+set -euo pipefail
+
+# First, make sure we have our tools set up correct :^)
+cd "$(git rev-parse --show-toplevel)"
+source ./setup-env
+
+# Enforce type checking!
+mypy
+
+# Enforce linting rules!
+flake8
